@@ -1,13 +1,18 @@
-from pprint import pprint
+from hostel_serializer import HostelSerializer
 from source_func import db_manipulation
+from pathlib import Path
 from student import Student
 from room import Room
 
 
 class Hostel:
 
-    def __init__(self, db_connect_dict: dict):
+    serializer = HostelSerializer()
+
+    def __init__(self, db_connect_dict: dict, path: Path, forms: list):
         self.connect_dict = db_connect_dict
+        self.file_path = path
+        self.file_forms = forms
         self.create_db()
         self.create_tables()
 
@@ -32,14 +37,16 @@ class Hostel:
               "FROM students LEFT JOIN rooms ON students.room=rooms.id " \
               "GROUP BY students.room ORDER BY ID;"
         result = db_manipulation(self.connect_dict, sql)
-        pprint(result)
+        for form in self.file_forms:
+            Hostel.serializer.serialize(result, form, self.file_path, "rooms_list")
 
     def get_top_min_age(self):
         sql = "SELECT rooms.ID AS ID, rooms.name AS NAME, CEILING(AVG(DATEDIFF(NOW(), students.birthday)))"\
               " AS AVERAGE_AGE FROM students LEFT JOIN rooms ON students.room=rooms.id GROUP BY students.room "\
               "ORDER BY AVERAGE_AGE LIMIT 5;"
         result = db_manipulation(self.connect_dict, sql)
-        pprint(result)
+        for form in self.file_forms:
+            Hostel.serializer.serialize(result, form, self.file_path, "rooms_min_age")
 
     def get_top_age_diff(self):
         sql = "SELECT rooms.id AS ID, rooms.name as NAME, "\
@@ -47,14 +54,16 @@ class Hostel:
               "AS AGE_DIFF FROM students LEFT JOIN rooms ON students.room=rooms.id "\
               "GROUP BY students.room ORDER BY AGE_DIFF DESC LIMIT 5;"
         result = db_manipulation(self.connect_dict, sql)
-        pprint(result)
+        for form in self.file_forms:
+            Hostel.serializer.serialize(result, form, self.file_path, "rooms_age_diff")
 
     def get_rooms_diff_sex(self):
         sql = "WITH cte AS (SELECT rooms.id AS ID, rooms.name AS NAME, COUNT(DISTINCT sex) uniq "\
               "FROM students LEFT JOIN rooms ON students.room=rooms.id GROUP BY students.room ORDER BY ID) "\
               "SELECT ID, NAME FROM cte WHERE uniq=2 ORDER BY ID;"
         result = db_manipulation(self.connect_dict, sql)
-        pprint(result)
+        for form in self.file_forms:
+            Hostel.serializer.serialize(result, form, self.file_path, "rooms_diff_sex")
 
     def load_students(self, data: list[dict]):
         for source_dict in data:
