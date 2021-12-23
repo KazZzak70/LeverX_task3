@@ -19,6 +19,6 @@ class RoomDB:
 
     @staticmethod
     def save(room: Room, connect_dict: dict):
-        sql = "INSERT INTO rooms (id, name) " \
-              "VALUES ({}, '{}');".format(room.id, room.name)
+        sql = """INSERT INTO rooms (id, name)
+                 VALUES (%d, '%s');""" % (room.id, room.name)
         db_manipulation(connect_dict, sql)

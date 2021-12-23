@@ -23,7 +23,7 @@ class StudentDB:
 
     @staticmethod
     def save(student: Student, connect_dict: dict):
-        sql = "INSERT INTO students (id, name, birthday, room_id, sex) " \
-              "VALUES ({}, '{}', '{}', {}, '{}');". \
-              format(student.id, student.name, student.birthday, student.room, student.sex)
+        sql = """INSERT INTO students (id, name, birthday, room_id, sex)
+                 VALUES (%d, '%s', '%s', %d, '%s');""" % (student.id, student.name, student.birthday,
+                                                          student.room, student.sex)
         db_manipulation(connect_dict, sql)
